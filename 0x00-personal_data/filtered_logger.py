@@ -5,8 +5,11 @@ This module to define filtered_logger
 
 
 import re
+import csv
 from typing import List
 import logging
+
+PII_FIELDS = ("name", "email", "phone", "ssn", "password")
 
 
 def filter_datum(fields: List[str], redaction: str, message: str,
@@ -18,6 +21,19 @@ def filter_datum(fields: List[str], redaction: str, message: str,
         message = re.sub(rf"{i}=(.*?)\{separator}",
                          f'{i}={redaction}{separator}', message)
     return message
+
+
+def get_logger() -> logging.Logger:
+    """Create and configure a logging.Logger object."""
+
+    logger = logging.getLogger("user_data")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    handler = logging.StreamHandler()
+    handler.setFormatter(RedactingFormatter(PII_FIELDS))
+    logger.addHandler(handler)
+    return logger
+
 
 
 class RedactingFormatter(logging.Formatter):

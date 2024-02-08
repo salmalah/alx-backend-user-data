@@ -6,6 +6,8 @@ This module to define filtered_logger
 
 import re
 import csv
+import os
+import mysql.connector
 from typing import List
 import logging
 
@@ -53,3 +55,16 @@ class RedactingFormatter(logging.Formatter):
         """Format log record with redaction."""
         return filter_datum(self.fields, self.REDACTION,
                             super().format(record), self.SEPARATOR)
+
+
+def get_db():
+    username = os.getenv("PERSONAL_DATA_DB_USERNAME", "root")
+    password = os.getenv("PERSONAL_DATA_DB_PASSWORD", "")
+    host = os.getenv("PERSONAL_DATA_DB_HOST", "localhost")
+    dbname = os.getenv("PERSONAL_DATA_DB_NAME", "")
+    return mysql.connector.connect(
+        user=username,
+        password=password,
+        host=host,
+        database=dbname
+    )

@@ -35,7 +35,6 @@ def get_logger() -> logging.Logger:
     return logger
 
 
-
 class RedactingFormatter(logging.Formatter):
     """
     RedactingFormatter class

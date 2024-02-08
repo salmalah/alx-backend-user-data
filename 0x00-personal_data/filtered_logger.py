@@ -57,14 +57,37 @@ class RedactingFormatter(logging.Formatter):
                             super().format(record), self.SEPARATOR)
 
 
-def get_db():
-    username = os.getenv("PERSONAL_DATA_DB_USERNAME", "root")
-    password = os.getenv("PERSONAL_DATA_DB_PASSWORD", "")
-    host = os.getenv("PERSONAL_DATA_DB_HOST", "localhost")
-    dbname = os.getenv("PERSONAL_DATA_DB_NAME", "")
-    return mysql.connector.connect(
-        user=username,
-        password=password,
-        host=host,
-        database=dbname
-    )
+def get_db() -> mysql.connector.connection.MySQLConnection:
+    """Get a connector to the MySQL database."""
+
+    db_passord = os.environ.get("PERSONAL_DATA_DB_PASSWORD", "")
+    db_username = os.environ.get('PERSONAL_DATA_DB_USERNAME', "root")
+    db_host = os.environ.get('PERSONAL_DATA_DB_HOST', 'localhost')
+    db_name = os.environ.get('PERSONAL_DATA_DB_NAME')
+    db_connector = mysql.connector.connect(
+        host=db_host,
+        database=db_name,
+        user=db_username,
+        password=db_passord)
+    return db_connector
+
+
+def main() -> None:
+    """
+    Obtain a database connection, retrieve all rows in the users table,
+    and display each row in a filtered format
+    """
+    db_connector = get_db()
+    cursor = db_connector.cursor()
+    cursor.execute("SELECT * FROM users;")
+    for row in cursor:
+        message = f"name={row[0]}; email={row[1]}; phone={row[2]}; " +\
+            f"ssn={row[3]}; password={row[4]};ip={row[5]}; " +\
+            f"last_login={row[6]}; user_agent={row[7]};"
+        print(message)
+    cursor.close()
+    db_connector.close()
+
+
+if __name__ == '__main__':
+    main()
